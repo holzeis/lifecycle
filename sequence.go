@@ -7,13 +7,13 @@ import (
 	"strings"
 )
 
-// QueryCommitted ...
+// QueryCommitted represents the sequence and version of a chaincode installation.
 type QueryCommitted struct {
 	Sequence int    `json:"sequence"`
 	Version  string `json:"version"`
 }
 
-// NextSequence ...
+// NextSequence calculates the next sequence number based on the committed chaincodes.
 func (l *Lifecycle) NextSequence() error {
 	command := []string{
 		"peer lifecycle chaincode querycommitted",

@@ -17,7 +17,7 @@ type Node struct {
 	RootCA string
 }
 
-// NewNode ...
+// NewNode builds a new node.
 func NewNode(mspID, endpoint string) Node {
 	return Node{
 		MSPID: mspID,
@@ -26,7 +26,7 @@ func NewNode(mspID, endpoint string) Node {
 	}
 }
 
-// Discover ...
+// Discover discovers the nodes within the network.
 func (l *Lifecycle) Discover() (err error) {
 	keystore, err := findKeystore()
 	if err != nil {
@@ -49,6 +49,7 @@ func (l *Lifecycle) Discover() (err error) {
 	}
 
 	for _, peer := range peers {
+		// build nodes from peers and config
 		node := NewNode(peer["MSPID"].(string), peer["Endpoint"].(string))
 
 		msp := config["msps"].(map[string]interface{})[node.MSPID].(map[string]interface{})
@@ -60,10 +61,12 @@ func (l *Lifecycle) Discover() (err error) {
 		if err != nil {
 			return err
 		}
+		// saving root ca to file for cli processing.
 		if _, err = rootCAFile.Write(rootCA); err != nil {
 			return err
 		}
 
+		// root ca has to be provided as file to the cli, hence we save the path to the saved root ca to the node.
 		node.RootCA = rootCAFile.Name()
 		l.Nodes = append(l.Nodes, node)
 	}
@@ -112,6 +115,7 @@ func (l *Lifecycle) config(keystore, signcert string) (config map[string]interfa
 }
 
 func findKeystore() (string, error) {
+	// read keystore file as the name is generated
 	files, err := ioutil.ReadDir(filepath.Join(os.Getenv("CORE_PEER_MSPCONFIGPATH"), "keystore"))
 	if err != nil {
 		return "", err
@@ -123,6 +127,7 @@ func findKeystore() (string, error) {
 }
 
 func findSigncert() (string, error) {
+	// read signcerts file as the name is generated
 	files, err := ioutil.ReadDir(filepath.Join(os.Getenv("CORE_PEER_MSPCONFIGPATH"), "signcerts"))
 	if err != nil {
 		return "", err

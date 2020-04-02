@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// Approve ...
+// Approve approves the given chaincode with ccid in the network. Performs a http request for each msp which is not the current.
 func (l *Lifecycle) Approve() error {
 	for _, node := range l.Nodes {
 		if node.MSPID == l.MSPID {
@@ -34,6 +34,7 @@ func (l *Lifecycle) Approve() error {
 
 func (l *Lifecycle) approve() error {
 	if l.checkIfChaincodeIsApproved() {
+		// if the chaincode has already been approved, it must not be approved again.
 		logger.Warnf("%v with sequence %v has already been approved on %v by %v", l.Chaincode, l.Sequence, l.Channel, l.MSPID)
 		return nil
 	}
@@ -70,7 +71,7 @@ func (l *Lifecycle) checkIfChaincodeIsApproved() bool {
 	}
 	// "--init-required"
 
-	// approve chaincode installation
+	// check if the chaincode has already been approved.
 	response, err := l.execute(strings.Join(command, " "))
 	if err != nil {
 		logger.Error(fmt.Sprintf("Error: %v", err.Error()))

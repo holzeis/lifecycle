@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// GetCCID ...
+// GetCCID gets the ccid (package id) of the requested chaincode and channel. Returns not found if not existing.
 func (l *Lifecycle) GetCCID() (err error) {
 	command := []string{
 		"peer lifecycle chaincode queryinstalled",

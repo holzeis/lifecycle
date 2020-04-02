@@ -7,7 +7,7 @@ import (
 	"regexp"
 )
 
-// Response ...
+// Response represents the command exec response.
 type Response struct {
 	Output bytes.Buffer
 	Logs   bytes.Buffer

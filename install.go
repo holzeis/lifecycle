@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// ChaincodeServerUserData ...
+// ChaincodeServerUserData represents the connection json structure.
 type ChaincodeServerUserData struct {
 	Address            string `json:"address"`
 	DialTimeout        string `json:"dial_timeout"`
@@ -22,7 +22,7 @@ type ChaincodeServerUserData struct {
 	RootCert           string `json:"root_cert"`   // PEM encoded peer chaincode certificate
 }
 
-// PackageMetadata ...
+// PackageMetadata represents the metadata json structure.
 type PackageMetadata struct {
 	Path  string `json:"path"`
 	Type  string `json:"type"`
@@ -59,7 +59,7 @@ func (l *Lifecycle) createConnection(path string) error {
 	return nil
 }
 
-// Install ...
+// Install installs the chaincode to the network using the nodes discovered by the discovery service. Performs a http request for each msp which is not the current.
 func (l *Lifecycle) Install() error {
 	for _, node := range l.Nodes {
 		if node.MSPID == l.MSPID {

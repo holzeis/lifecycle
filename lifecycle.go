@@ -15,7 +15,7 @@ import (
 
 var logger = flogging.MustGetLogger("lifecycle")
 
-// Lifecycle ...
+// Lifecycle keeping all data required for the lifecycle cli commands
 type Lifecycle struct {
 	MSPID string
 
@@ -26,7 +26,7 @@ type Lifecycle struct {
 	Nodes     []Node
 }
 
-// NewLifecycle ...
+// NewLifecycle builds a new lifecycle struct
 func NewLifecycle(vars map[string]string) Lifecycle {
 	sequence := 1
 	if seq, ok := vars["sequence"]; ok {
@@ -42,7 +42,7 @@ func NewLifecycle(vars map[string]string) Lifecycle {
 	}
 }
 
-// Deploy ...
+// Deploy deploys a chaincode as external service to the network.
 func Deploy(w http.ResponseWriter, req *http.Request) {
 	lifecycle := NewLifecycle(mux.Vars(req))
 
@@ -85,7 +85,7 @@ func Deploy(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-// Install ...
+// Install installs a chaincode as external service to the given peer.
 func Install(w http.ResponseWriter, req *http.Request) {
 	lifecycle := NewLifecycle(mux.Vars(req))
 	if err := lifecycle.install(); err != nil {
@@ -95,7 +95,7 @@ func Install(w http.ResponseWriter, req *http.Request) {
 	logger.Infof("Successfully installed %v with ccid %v", lifecycle.Chaincode, lifecycle.CCID)
 }
 
-// Approve ...
+// Approve approves the given chaincode for the given channel and ccid.
 func Approve(w http.ResponseWriter, req *http.Request) {
 	lifecycle := NewLifecycle(mux.Vars(req))
 
@@ -106,7 +106,7 @@ func Approve(w http.ResponseWriter, req *http.Request) {
 	logger.Infof("Successfully approved %v with ccid %v[%v] on %v", lifecycle.Chaincode, lifecycle.CCID, lifecycle.Sequence, lifecycle.Channel)
 }
 
-// Installed ...
+// Installed returns the ccid of the requested chaincode and channel.
 func Installed(w http.ResponseWriter, req *http.Request) {
 	lifecycle := NewLifecycle(mux.Vars(req))
 

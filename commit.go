@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// Commit ...
+// Commit commits the chaincode to the network, using the nodes discovered by the discovery services.
 func (l *Lifecycle) Commit() error {
 	command := []string{
 		"peer lifecycle chaincode commit",
