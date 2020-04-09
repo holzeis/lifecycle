@@ -12,6 +12,7 @@ import (
 
 // Node ...
 type Node struct {
+	Name   string
 	MSPID  string
 	Host   string
 	RootCA string
@@ -23,6 +24,7 @@ func NewNode(mspID, endpoint string) Node {
 		MSPID: mspID,
 		// the peer endpoint is added like peer-0.peer.host. we need to split the prefixes in order to get the host.
 		Host: strings.Join(strings.Split(strings.Split(endpoint, ":")[0], ".")[2:], "."),
+		Name: strings.Split(endpoint, ".")[0],
 	}
 }
 
@@ -57,7 +59,7 @@ func (l *Lifecycle) Discover() (err error) {
 		if err != nil {
 			logger.Error(fmt.Sprintf("Error: %v", err.Error()))
 		}
-		rootCAFile, err := ioutil.TempFile("", fmt.Sprintf("%v", node.MSPID))
+		rootCAFile, err := ioutil.TempFile("", fmt.Sprintf("%v-%v", node.MSPID, node.Name))
 		if err != nil {
 			return err
 		}

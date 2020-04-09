@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/google/uuid"
@@ -62,6 +62,9 @@ func (l *Lifecycle) createConnection(path string) error {
 // Install installs the chaincode to the network using the nodes discovered by the discovery service. Performs a http request for each msp which is not the current.
 func (l *Lifecycle) Install() error {
 	for _, node := range l.Nodes {
+		if node.Name != "peer-0" {
+			continue
+		}
 		if node.MSPID == l.MSPID {
 			// if msp is local msp, no need to make an http request
 			if err := l.install(); err != nil {
@@ -106,18 +109,41 @@ func (l *Lifecycle) install() error {
 		return err
 	}
 
-	command := []string{
-		"peer lifecycle chaincode install",
-		fmt.Sprintf("%v/%v.tgz", path, l.Chaincode),
-		fmt.Sprintf("--peerAddresses %v", os.Getenv("CORE_PEER_ADDRESS")),
-		fmt.Sprintf("--tlsRootCertFiles %v", os.Getenv("CORE_PEER_TLS_ROOTCERT_FILE")),
+	// TODO: config root shouldn't be hardcoded here.
+	configroot := "/artifacts/crypto-config"
+	for _, node := range l.Nodes {
+		admin, err := findAdmin(filepath.Join(configroot, node.Name, "msp/users/"))
+		if err != nil {
+			return err
+		}
+		command := []string{
+			fmt.Sprintf("CORE_PEER_MSPCONFIGPATH=%v", filepath.Join(configroot, node.Name, "msp/users", admin, "msp")),
+			"peer lifecycle chaincode install",
+			fmt.Sprintf("%v/%v.tgz", path, l.Chaincode),
+			fmt.Sprintf("--peerAddresses %v.peer.%v:%v", node.Name, node.Host, "7051"),
+			fmt.Sprintf("--tlsRootCertFiles %v", filepath.Join(configroot, node.Name, "tls/ca-cert.pem")),
+		}
+
+		response, err := l.execute(strings.Join(command, " "))
+		if err != nil {
+			return err
+		}
+
+		if node.Name == "peer-0" {
+			l.CCID, _ = response.findInLogs(fmt.Sprintf("%v:\\w*", l.Chaincode))
+		}
 	}
 
-	response, err := l.execute(strings.Join(command, " "))
-	if err != nil {
-		return err
-	}
-
-	l.CCID, _ = response.findInLogs(fmt.Sprintf("%v:\\w*", l.Chaincode))
 	return nil
+}
+
+func findAdmin(path string) (string, error) {
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		return "", err
+	}
+	if len(files) == 0 {
+		return "", fmt.Errorf("Missing admin folder")
+	}
+	return files[0].Name(), nil
 }

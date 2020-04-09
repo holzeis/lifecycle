@@ -11,6 +11,9 @@ import (
 // Approve approves the given chaincode with ccid in the network. Performs a http request for each msp which is not the current.
 func (l *Lifecycle) Approve() error {
 	for _, node := range l.Nodes {
+		if node.Name != "peer-0" {
+			continue
+		}
 		if node.MSPID == l.MSPID {
 			// if msp is local msp, no need to make an http request
 			if err := l.approve(); err != nil {

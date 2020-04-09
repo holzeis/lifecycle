@@ -126,7 +126,7 @@ func Installed(w http.ResponseWriter, req *http.Request) {
 
 func main() {
 	r := mux.NewRouter()
-	r.HandleFunc("/{channel}/deploy/{chaincode}", Deploy).Methods("POST")
+	r.HandleFunc("/{channel}/deploy/{chaincode}", Deploy).Methods("GET")
 	r.HandleFunc("/install/{chaincode}", Install).Methods("GET")
 	r.HandleFunc("/{channel}/approve/{chaincode}/{sequence}/{ccid}", Approve).Methods("GET")
 	r.HandleFunc("/{channel}/installed/{chaincode}", Installed).Methods("GET")

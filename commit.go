@@ -21,6 +21,10 @@ func (l *Lifecycle) Commit() error {
 	// --init-required
 
 	for _, node := range l.Nodes {
+		if node.Name != "peer-0" {
+			continue
+		}
+		fmt.Println(fmt.Sprintf("--peerAddresses peer.%v:%v", node.Host, "7051"))
 		command = append(command, fmt.Sprintf("--peerAddresses peer.%v:%v", node.Host, "7051"))
 		command = append(command, fmt.Sprintf("--tlsRootCertFiles %v", node.RootCA))
 	}
