@@ -26,6 +26,10 @@ func (l *Lifecycle) GetCCID() (err error) {
 		return err
 	}
 
+	if _, ok := chaincodes["installed_chaincodes"]; !ok {
+		return nil
+	}
+
 	installed := chaincodes["installed_chaincodes"].([]interface{})
 	for _, inst := range installed {
 		mapped := inst.(map[string]interface{})
