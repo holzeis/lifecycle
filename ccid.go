@@ -49,7 +49,6 @@ func (l *Lifecycle) GetCCID() (err error) {
 		}
 
 		l.CCID = mapped["package_id"].(string)
-
 		return nil
 	}
 
