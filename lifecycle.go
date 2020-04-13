@@ -3,10 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -124,12 +126,45 @@ func Installed(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, "%v", lifecycle.CCID)
 }
 
+// Joined returns ok if the peer has joined the given channel.
+func Joined(w http.ResponseWriter, req *http.Request) {
+	lifecycle := NewLifecycle(mux.Vars(req))
+
+	response, err := lifecycle.execute("peer channel list")
+	if err != nil {
+		logger.Error(fmt.Sprintf("Error: %v", err.Error()))
+		http.Error(w, fmt.Sprintf("Error: %v", err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Println(response.Output.String())
+
+	// skip first line
+	output := response.Output
+	output.ReadString('\n')
+	for {
+		channel, err := output.ReadString('\n')
+		if strings.TrimRight(channel, "\n") == lifecycle.Channel {
+			logger.Infof("Peer has joined %v", lifecycle.Channel)
+			return
+		}
+		if err == io.EOF {
+			break
+		}
+	}
+
+	logger.Warnf("Peer has not joined %v yet.", lifecycle.Channel)
+	http.Error(w, fmt.Sprintf("Peer has not joined %v yet.", lifecycle.Channel), http.StatusNotFound)
+	return
+}
+
 func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/{channel}/deploy/{chaincode}", Deploy).Methods("GET")
 	r.HandleFunc("/install/{chaincode}", Install).Methods("GET")
 	r.HandleFunc("/{channel}/approve/{chaincode}/{sequence}/{ccid}", Approve).Methods("GET")
 	r.HandleFunc("/{channel}/installed/{chaincode}", Installed).Methods("GET")
+	r.HandleFunc("/{channel}/joined", Joined).Methods("GET")
 	server := &http.Server{Addr: ":8090", Handler: r}
 
 	go func() {
