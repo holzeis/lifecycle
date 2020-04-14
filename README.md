@@ -24,7 +24,11 @@ Approves a chaincode installation for the given channel, chaincode, sequence num
 
 ### GET /{channel}/installed/{chaincode}
 
-Returnes the installed and committed chaincode on the given channel. Returns 404 if the chaincode has not been installed on that channel.
+Returns the installed and committed chaincode on the given channel. Returns 404 if the chaincode has not been installed on that channel.
+
+### GET /{channel}/joined
+
+Returns 200 if the peer has joined the given channel and 404 if not.
 
 ## Used environment variables
 
